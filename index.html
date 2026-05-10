@@ -1,137 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Professional Scanner with Timer</title>
     <style>
         body {
-            background-color: #0e1111;
+            background-color: #111;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            font-family: sans-serif;
         }
 
-        /* Scanner Container */
-        .scanner-wrapper {
-            text-align: center;
-        }
-
-        .scan-container {
+        /* Scanning Box */
+        .scan-box {
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: 250px;
+            height: 250px;
+            border: 2px solid #333;
             background: rgba(0, 255, 0, 0.05);
-            border: 2px solid rgba(0, 255, 0, 0.2);
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
         }
 
-        /* Scanning Animated Line */
-        .scan-line {
-            position: absolute;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(to bottom, transparent, #00FF00, transparent);
-            box-shadow: 0 0 15px #00FF00;
-            top: 0;
-            animation: move-line 3s ease-in-out infinite;
-            z-index: 2;
-        }
-
-        @keyframes move-line {
-            0% { top: 0%; }
-            50% { top: 100%; }
-            100% { top: 0%; }
-        }
-
-        /* Corner Borders */
-        .corners {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-        }
-
-        .corners::before, .corners::after {
+        /* Neon Corners */
+        .scan-box::before {
             content: '';
             position: absolute;
-            width: 30px;
-            height: 30px;
-            border: 4px solid #00FF00;
+            top: -5px; left: -5px; width: 260px; height: 260px;
+            border: 3px solid #00FF00;
+            clip-path: polygon(0 0, 20% 0, 20% 10%, 0 10%, 0 90%, 20% 90%, 20% 100%, 0 100%, 0% 100%, 80% 100%, 80% 90%, 100% 90%, 100% 100%, 100% 100%, 100% 10%, 80% 10%, 80% 0, 100% 0);
+            pointer-events: none;
         }
 
-        .corners::before { top: 0; left: 0; border-right: none; border-bottom: none; }
-        .corners::after { top: 0; right: 0; border-left: none; border-bottom: none; }
-
-        /* Timer in the Center */
-        .timer-box {
+        /* Moving Scan Line */
+        .line {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 3;
+            width: 100%;
+            height: 3px;
+            background: #00FF00;
+            box-shadow: 0 0 15px #00FF00;
+            top: 0;
+            animation: scan 2s linear infinite;
         }
 
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+
+        /* Timer Text */
         #timer {
-            font-size: 3rem;
-            color: #00FF00;
+            font-size: 50px;
             font-weight: bold;
-            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            color: #00FF00;
+            margin-bottom: 10px;
+            z-index: 10;
         }
 
-        .status-text {
-            color: #fff;
-            margin-top: 10px;
+        .label {
+            font-size: 14px;
             letter-spacing: 2px;
-            font-size: 0.9rem;
+            color: #ccc;
             text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-<div class="scanner-wrapper">
-    <div class="scan-container">
-        <div class="corners"></div>
-        <div class="scan-line"></div>
-        
-        <div class="timer-box">
-            <div id="timer">05</div>
-            <div id="status" class="status-text">Scanning...</div>
-        </div>
+    <div class="scan-box">
+        <div class="line"></div>
+        <div id="timer">05</div>
+        <div class="label" id="status">Analyzing...</div>
     </div>
-</div>
 
-<script>
-    let timeLeft = 5; // Kitne second ka timer chahiye
-    const timerDisplay = document.getElementById('timer');
-    const statusText = document.getElementById('status');
+    <script>
+        let count = 5;
+        const timerElement = document.getElementById('timer');
+        const statusElement = document.getElementById('status');
 
-    const countdown = setInterval(() => {
-        timeLeft--;
-        
-        // Timer update logic
-        timerDisplay.innerText = timeLeft < 10 ? `0${timeLeft}` : timeLeft;
+        const countdown = setInterval(() => {
+            count--;
+            timerElement.innerText = count < 10 ? "0" + count : count;
 
-        if (timeLeft <= 0) {
-            clearInterval(countdown);
-            timerDisplay.innerText = "OK";
-            timerDisplay.style.color = "#fff";
-            statusText.innerText = "Scan Complete!";
-            statusText.style.color = "#00FF00";
-            
-            // Yahan aap redirection link add kar sakte hain:
-            // window.location.href = "https://your-link.com";
-        }
-    }, 1000);
-</script>
+            if (count <= 0) {
+                clearInterval(countdown);
+                timerElement.innerText = "DONE";
+                statusElement.innerText = "Success!";
+                statusElement.style.color = "#00FF00";
+            }
+        }, 1000);
+    </script>
 
 </body>
 </html>
