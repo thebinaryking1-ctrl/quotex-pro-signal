@@ -2,148 +2,136 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GAUTAM TRADING ACADEMY</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Scanner with Timer</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background: #050507; color: #d1d5db; overflow: hidden; }
-        .timer-font { font-family: 'Orbitron', sans-serif; }
-        .active-pair { background: #10b981; color: #000; font-weight: 900; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .pattern-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
-        .active-pattern { border-color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        body {
+            background-color: #0e1111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Scanner Container */
+        .scanner-wrapper {
+            text-align: center;
+        }
+
+        .scan-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            background: rgba(0, 255, 0, 0.05);
+            border: 2px solid rgba(0, 255, 0, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        /* Scanning Animated Line */
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to bottom, transparent, #00FF00, transparent);
+            box-shadow: 0 0 15px #00FF00;
+            top: 0;
+            animation: move-line 3s ease-in-out infinite;
+            z-index: 2;
+        }
+
+        @keyframes move-line {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+
+        /* Corner Borders */
+        .corners {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .corners::before, .corners::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border: 4px solid #00FF00;
+        }
+
+        .corners::before { top: 0; left: 0; border-right: none; border-bottom: none; }
+        .corners::after { top: 0; right: 0; border-left: none; border-bottom: none; }
+
+        /* Timer in the Center */
+        .timer-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 3;
+        }
+
+        #timer {
+            font-size: 3rem;
+            color: #00FF00;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .status-text {
+            color: #fff;
+            margin-top: 10px;
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
     </style>
 </head>
-<body class="h-screen flex flex-col p-2 gap-2">
+<body>
 
-    <header class="bg-[#0C0D11] p-3 rounded-2xl border border-white/5 flex justify-between items-center shadow-2xl">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                <i data-lucide="graduation-cap" class="text-white w-5 h-5"></i>
-            </div>
-            <h1 class="text-[10px] font-black tracking-widest text-white uppercase">Gautam Learn & Earn</h1>
+<div class="scanner-wrapper">
+    <div class="scan-container">
+        <div class="corners"></div>
+        <div class="scan-line"></div>
+        
+        <div class="timer-box">
+            <div id="timer">05</div>
+            <div id="status" class="status-text">Scanning...</div>
         </div>
-        <div id="timer" class="timer-font text-xl text-emerald-500">00:60</div>
-    </header>
-
-    <div class="flex flex-1 gap-2 overflow-hidden">
-        <aside class="w-20 overflow-y-auto no-scrollbar flex flex-col gap-2">
-            <div id="assetList" class="flex flex-col gap-1"></div>
-        </aside>
-
-        <main class="flex-1 flex flex-col gap-2 overflow-hidden">
-            <section class="h-1/2 bg-[#0C0D11] rounded-3xl border border-white/5 flex flex-col items-center justify-center p-4 relative shadow-inner">
-                <div id="signalType" class="text-4xl font-black italic uppercase text-gray-700 tracking-tighter">Scanning...</div>
-                <div id="accBox" class="mt-2 px-3 py-1 bg-white/5 rounded-full text-[10px] font-bold text-emerald-400 hidden">
-                    CONFIDENCE: <span id="accuracyText">--</span>
-                </div>
-                <div id="tradeBtn" class="mt-4 hidden animate-bounce px-6 py-2 rounded-xl bg-emerald-500 text-black font-black text-xs uppercase shadow-lg shadow-emerald-500/20">Place Trade Now</div>
-            </section>
-
-            <section class="flex-1 bg-[#0C0D11] rounded-3xl border border-white/5 p-4 overflow-y-auto no-scrollbar">
-                <h3 class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 border-b border-white/5 pb-2">Candlestick Guide & Logic</h3>
-                <div id="learningContent" class="space-y-3">
-                    <div class="text-center py-6 text-gray-600 italic text-xs">Waiting for a pattern to form... Signal aate hi yahan detail dikhegi.</div>
-                </div>
-            </section>
-        </main>
     </div>
+</div>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        lucide.createIcons();
-        const assets = ["EUR/USD", "GBP/USD", "USD/JPY", "USD/INR", "GOLD", "BTC", "ETH", "EUR/JPY"];
-        let currentPair = "EUR/USD";
+<script>
+    let timeLeft = 5; // Kitne second ka timer chahiye
+    const timerDisplay = document.getElementById('timer');
+    const statusText = document.getElementById('status');
 
-        // Guide Data
-        const candleGuides = {
-            'Morning Star': {
-                logic: "Bullish Reversal: Ye signal tab aata hai jab market gir raha ho aur bottom par ek choti candle ke baad badi green candle bane.",
-                tip: "Next candle par CALL ki trade lein. Accuracy 90% tab hoti hai jab ye Support level par bane."
-            },
-            'Shooting Star': {
-                logic: "Bearish Reversal: Ye signal uptrend ke top par banti hai. Iski lambi 'wick' batati hai ki sellers market ko niche dhakel rahe hain.",
-                tip: "Next candle par PUT ki trade lein. Resistance level par ye sabse best kaam karta hai."
-            },
-            'Bullish Engulfing': {
-                logic: "Green candle ne pichli red candle ko poora cover kar liya hai. Iska matlab buyers bohot strong hain.",
-                tip: "Strong BUY signal. Market yahan se upar jayega."
-            },
-            'Bearish Engulfing': {
-                logic: "Red candle ne pichli green candle ko poora dhak liya hai. Sellers ne control le liya hai.",
-                tip: "Strong SELL signal. Market yahan se niche girega."
-            }
-        };
+    const countdown = setInterval(() => {
+        timeLeft--;
+        
+        // Timer update logic
+        timerDisplay.innerText = timeLeft < 10 ? `0${timeLeft}` : timeLeft;
 
-        const list = document.getElementById('assetList');
-        assets.forEach(a => {
-            const b = document.createElement('button');
-            b.className = `p-3 rounded-xl text-[9px] font-bold ${a===currentPair?'active-pair':'bg-white/5 text-gray-500'}`;
-            b.innerText = a;
-            b.onclick = () => {
-                document.querySelectorAll('#assetList button').forEach(x => x.className='p-3 rounded-xl text-[9px] font-bold bg-white/5 text-gray-500');
-                b.className='p-3 rounded-xl text-[9px] font-bold active-pair';
-                currentPair = a;
-                reset();
-            };
-            list.appendChild(b);
-        });
-
-        function reset() {
-            document.getElementById('signalType').innerText = "Scanning...";
-            document.getElementById('signalType').className = "text-4xl font-black italic uppercase text-gray-700 tracking-tighter";
-            document.getElementById('accBox').classList.add('hidden');
-            document.getElementById('tradeBtn').classList.add('hidden');
-            document.getElementById('learningContent').innerHTML = '<div class="text-center py-6 text-gray-600 italic text-xs">Analyzing market structure...</div>';
-        }
-
-        setInterval(() => {
-            const s = new Date().getSeconds();
-            const left = 60 - s;
-            document.getElementById('timer').innerText = `00:${left<10?'0'+left:left}`;
-
-            if(s === 55) {
-                const patterns = Object.keys(candleGuides);
-                const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
-                const isBuy = randomPattern.includes('Morning') || randomPattern.includes('Bullish');
-                
-                showSignal(isBuy ? 'STRONG CALL ↑' : 'STRONG PUT ↓', randomPattern, isBuy);
-            }
-            if(s === 2) reset();
-        }, 1000);
-
-        function showSignal(type, pattern, isBuy) {
-            const sig = document.getElementById('signalType');
-            sig.innerText = type;
-            sig.className = `text-4xl font-black italic uppercase tracking-tighter ${isBuy?'text-emerald-500':'text-red-500'}`;
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            timerDisplay.innerText = "OK";
+            timerDisplay.style.color = "#fff";
+            statusText.innerText = "Scan Complete!";
+            statusText.style.color = "#00FF00";
             
-            document.getElementById('accBox').classList.remove('hidden');
-            document.getElementById('accuracyText').innerText = (93 + Math.random()*5).toFixed(1) + "%";
-            
-            const btn = document.getElementById('tradeBtn');
-            btn.classList.remove('hidden');
-            btn.className = `mt-4 animate-bounce px-6 py-2 rounded-xl text-black font-black text-xs uppercase shadow-lg ${isBuy?'bg-emerald-500':'bg-red-500'}`;
-            btn.innerText = isBuy ? "BUY NOW ↑" : "SELL NOW ↓";
-
-            // Update Learning Content
-            const guide = candleGuides[pattern];
-            document.getElementById('learningContent').innerHTML = `
-                <div class="pattern-card p-3 rounded-2xl active-pattern">
-                    <div class="flex items-center gap-2 mb-2">
-                        <i data-lucide="book-open" class="w-4 h-4 text-emerald-500"></i>
-                        <span class="text-xs font-black text-white uppercase">${pattern} Identified</span>
-                    </div>
-                    <p class="text-[11px] text-gray-300 leading-relaxed mb-3">${guide.logic}</p>
-                    <div class="bg-black/50 p-2 rounded-lg border border-white/5">
-                        <span class="text-[9px] font-black text-emerald-400 uppercase tracking-tighter block mb-1">PRO TIP:</span>
-                        <p class="text-[10px] text-gray-400 italic">${guide.tip}</p>
-                    </div>
-                </div>
-            `;
-            lucide.createIcons();
+            // Yahan aap redirection link add kar sakte hain:
+            // window.location.href = "https://your-link.com";
         }
-    </script>
+    }, 1000);
+</script>
+
 </body>
 </html>
